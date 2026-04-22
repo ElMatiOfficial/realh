@@ -10,12 +10,15 @@ on:
 
 permissions:
   contents: read
+  # gitleaks-action@v2 fetches PR commits via the REST API — denied with 403
+  # when this scope is missing, even though the job only reads.
+  pull-requests: read
 
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
