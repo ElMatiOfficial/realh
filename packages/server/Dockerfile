@@ -9,7 +9,7 @@
 # run via a mounted volume. In production, set KEY_MANAGER=kms and point it at
 # your cloud KMS — see docs/SECURITY_ARCHITECTURE.md.
 
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
@@ -18,7 +18,7 @@ COPY packages/server/package.json packages/server/package.json
 RUN npm ci --omit=dev --workspace=packages/server --include-workspace-root \
  && npm cache clean --force
 
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3001
