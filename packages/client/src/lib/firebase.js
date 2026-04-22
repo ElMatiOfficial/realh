@@ -7,8 +7,8 @@ import {
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-api-key',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'humanledger-poc.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'humanledger-poc',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'realh-poc.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'realh-poc',
 };
 
 const app = initializeApp(firebaseConfig);

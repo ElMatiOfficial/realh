@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a new capability or behavior
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a feature. Before you file:
+
+        - For small, obvious improvements, a PR is fine without prior discussion.
+        - For changes that affect the credential schema, key management, verification flow, or the provider adapter interface, please start here so we can align on design before code is written.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What real-world need is this solving? Who feels the pain?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Concrete sketch of the API surface, config, or UX.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you think about and reject? Why?
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Server API
+        - Client dashboard
+        - Credential schema
+        - Key management
+        - Provider adapter
+        - Docs
+        - CI / tooling
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Are you willing to contribute?
+      options:
+        - label: I am willing to open a PR for this.

@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
-const KEY_ID = 'humanledger-key-1';
+const KEY_ID = 'realh-key-1';
 const ALG = 'EdDSA';
 
 let privateKey = null;

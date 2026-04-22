@@ -37,7 +37,7 @@ export default function AuthScreen() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-human-neon/10 mb-4 border border-human-neon/20">
             <Fingerprint className="w-8 h-8 text-human-neon" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">HumanLedger Access</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">RealH Access</h2>
           <p className="text-slate-400">Secure Identity & Asset Verification</p>
         </div>
 

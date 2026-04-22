@@ -16,7 +16,7 @@ export async function authenticate(req, res, next) {
       // In demo mode, token format is "demo_<uid>" or we decode a simple base64
       if (token.startsWith('demo_')) {
         uid = token;
-        email = 'demo@humanledger.dev';
+        email = 'demo@realh.dev';
       } else {
         // Try to parse as JSON base64 (from Firebase client SDK mock)
         try {

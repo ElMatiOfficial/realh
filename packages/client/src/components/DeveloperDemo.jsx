@@ -43,7 +43,7 @@ export default function DeveloperDemo() {
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white mb-2">Developer Integration</h2>
-        <p className="text-slate-400">Test the HumanLedger API and explore integration patterns.</p>
+        <p className="text-slate-400">Test the RealH API and explore integration patterns.</p>
       </div>
 
       {/* Live test */}
@@ -65,7 +65,7 @@ export default function DeveloperDemo() {
                   <Fingerprint className="w-4 h-4 text-slate-950" />
                 </div>
               )}
-              <span className="text-white font-bold">Verify with HumanLedger</span>
+              <span className="text-white font-bold">Verify with RealH</span>
             </div>
           </button>
         </div>
@@ -83,7 +83,7 @@ export default function DeveloperDemo() {
               <CheckCircle className="w-5 h-5 text-human-bio mt-0.5" />
               <div className="flex-1">
                 <div className="font-bold text-human-bio mb-1">Authentication Successful</div>
-                <div className="text-sm text-slate-300 mb-3">Signed JWT verification token issued by HumanLedger.</div>
+                <div className="text-sm text-slate-300 mb-3">Signed JWT verification token issued by RealH.</div>
                 <div className="text-xs font-mono text-slate-500 break-all bg-black/20 p-3 rounded relative">
                   {token}
                   <button

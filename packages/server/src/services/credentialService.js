@@ -8,13 +8,13 @@ export function getIssuerDid(hostname) {
 
 export async function issueCredential({ humanId, title, contentHash, contentType, hostname }) {
   const now = new Date().toISOString();
-  const credentialId = `urn:humanledger:credential:${randomUUID()}`;
+  const credentialId = `urn:realh:credential:${randomUUID()}`;
   const issuerDid = getIssuerDid(hostname);
 
   const credential = {
     '@context': [
       'https://www.w3.org/ns/credentials/v2',
-      'https://humanledger.org/ns/v1',
+      'https://realh.org/ns/v1',
     ],
     id: credentialId,
     type: ['VerifiableCredential', 'HumanCreationCertificate'],
@@ -24,7 +24,7 @@ export async function issueCredential({ humanId, title, contentHash, contentType
       type: 'HumanCreatedWork',
       creator: {
         type: 'VerifiedHuman',
-        id: `urn:humanledger:human:${humanId}`,
+        id: `urn:realh:human:${humanId}`,
       },
       work: {
         title,
@@ -90,7 +90,7 @@ export async function issueHumanVerificationToken(humanId, hostname) {
     humanVerified: true,
   })
     .setProtectedHeader({ alg: 'EdDSA', kid: getKeyId() })
-    .setSubject(`urn:humanledger:human:${humanId}`)
+    .setSubject(`urn:realh:human:${humanId}`)
     .setIssuer(issuerDid)
     .setIssuedAt()
     .setExpirationTime('1h')

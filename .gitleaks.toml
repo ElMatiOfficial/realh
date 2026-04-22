@@ -1,0 +1,29 @@
+# RealH gitleaks configuration.
+# Extends the bundled default ruleset (covers most common provider credentials).
+# Docs: https://github.com/gitleaks/gitleaks
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project-level allowlist for known-safe matches"
+paths = [
+  # Lockfile integrity hashes trigger high-entropy rules but are public.
+  '''(^|/)package-lock\.json$''',
+  # Example env files must never contain real secrets; excluded so legitimate
+  # placeholder values (FIREBASE_PRIVATE_KEY=) don't look like near-hits.
+  '''(^|/)\.env\.example$''',
+  # Built artifacts and dependency trees.
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+  '''(^|/)build/''',
+  # Public JWK is intentionally published via /.well-known/jwks.json.
+  '''(^|/)packages/server/keys/public\.jwk\.json$''',
+]
+
+# Additional rule for private JWK files — private keys here are a critical leak.
+[[rules]]
+id = "realh-private-jwk"
+description = "RealH Ed25519 private JWK"
+regex = '''"d"\s*:\s*"[A-Za-z0-9_-]{32,}"'''
+tags = ["key", "ed25519", "private"]

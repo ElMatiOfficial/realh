@@ -1,5 +1,5 @@
 {
-  "name": "@humanledger/server",
+  "name": "@realh/server",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -20,6 +21,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.3",
     "vitest": "^1.2.0"

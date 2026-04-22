@@ -1,0 +1,56 @@
+# Version control / agent dirs
+.git
+.github
+.gitignore
+.gitleaks.toml
+.husky
+.claude
+.vscode
+.idea
+
+# Node
+node_modules
+packages/*/node_modules
+
+# Build outputs (rebuilt inside the image)
+dist
+build
+packages/*/dist
+packages/*/build
+*.tsbuildinfo
+
+# Secrets / runtime state — must never ship inside an image.
+**/.env
+**/.env.local
+**/.env.*.local
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+packages/server/keys/*.jwk.json
+credentials*.json
+service-account*.json
+
+# Logs, caches, coverage
+*.log
+coverage
+.nyc_output
+.cache
+.parcel-cache
+.vite
+.eslintcache
+.turbo
+
+# Docs + infra that the app doesn't need at runtime
+docs
+README.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+LICENSE
+docker-compose.yml
+Dockerfile*
+
+# OS
+.DS_Store
+Thumbs.db

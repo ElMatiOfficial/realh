@@ -52,7 +52,7 @@ router.get('/mock-demo/authorize', (req, res) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>HumanLedger - Identity Verification</title>
+      <title>RealH - Identity Verification</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -74,7 +74,7 @@ router.get('/mock-demo/authorize', (req, res) => {
       <div class="card">
         <div class="badge">DEMO PROVIDER</div>
         <h1>Identity Verification</h1>
-        <p class="subtitle">HumanLedger is requesting to verify your identity.</p>
+        <p class="subtitle">RealH is requesting to verify your identity.</p>
         <div class="info">
           <p><strong>What happens next:</strong></p>
           <p>In production, this page would be hosted by your country's identity provider (e.g., eIDAS, Login.gov). You would verify using your government ID.</p>

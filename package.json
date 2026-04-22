@@ -1,5 +1,5 @@
 {
-  "name": "humanledger",
+  "name": "realh",
   "private": true,
   "version": "0.1.0",
   "workspaces": [
@@ -11,6 +11,12 @@
     "dev:server": "npm run dev -w packages/server",
     "dev:client": "npm run dev -w packages/client",
     "build": "npm run build -w packages/client",
-    "test": "npm run test -w packages/server"
+    "test": "npm run test -w packages/server",
+    "lint": "npm run lint -w packages/server && npm run lint -w packages/client",
+    "audit": "npm audit --audit-level=high",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

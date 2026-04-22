@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# RealH pre-commit hook.
+# Runs a local secret scan on staged changes so obvious leaks are caught
+# before they even reach a push. The GitHub Action `.github/workflows/gitleaks.yml`
+# is the authoritative check on PRs; this is a fast local guard.
+
+set -e
+
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] gitleaks protect --staged"
+  gitleaks protect --staged --redact --config .gitleaks.toml || {
+    echo ""
+    echo "gitleaks flagged potential secrets in staged changes."
+    echo "If this is a false positive, add an allow rule to .gitleaks.toml and retry."
+    echo "If it is a real secret:"
+    echo "  1. Unstage the file: git restore --staged <path>"
+    echo "  2. Rotate the credential immediately — treat it as compromised."
+    echo "  3. Remove it from the working tree before committing again."
+    exit 1
+  }
+else
+  echo "[pre-commit] gitleaks not installed — skipping local secret scan."
+  echo "            Install: https://github.com/gitleaks/gitleaks#installing"
+  echo "            (CI will still run gitleaks on your PR.)"
+fi

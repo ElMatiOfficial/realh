@@ -1,0 +1,49 @@
+# RealH — local / self-hosting compose file.
+#
+# Quick start:
+#   cp packages/server/.env.example packages/server/.env
+#   docker compose up --build
+#
+# Production note: the `realh_keys` volume is a convenience for demos. In
+# production, replace it with a KMS-backed key manager (see docs/SECURITY_ARCHITECTURE.md)
+# and remove the volume entirely — private keys should never land on a shared disk.
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    env_file:
+      - packages/server/.env
+    environment:
+      PORT: "3001"
+      # When the client talks to the server by service name inside the compose
+      # network, CORS needs to allow whatever the browser-visible origin is.
+      # Override CORS_ORIGINS in your .env for anything beyond localhost.
+    ports:
+      - "3001:3001"
+    volumes:
+      - realh_keys:/app/packages/server/keys
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  client:
+    build:
+      context: .
+      dockerfile: packages/client/Dockerfile
+      args:
+        # In a real deployment this should point at your public API origin.
+        VITE_API_URL: http://localhost:3001
+    ports:
+      - "8080:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  realh_keys:

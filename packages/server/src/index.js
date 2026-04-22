@@ -5,7 +5,7 @@ import { initializeProviders } from './providers/index.js';
 import { createApp } from './app.js';
 
 async function main() {
-  console.log(`Starting HumanLedger API server (${config.demoMode ? 'DEMO' : 'PRODUCTION'} mode)...`);
+  console.log(`Starting RealH API server (${config.demoMode ? 'DEMO' : 'PRODUCTION'} mode)...`);
 
   // Initialize subsystems
   await initializeKeys(process.env.KEYS_DIR || 'keys');
@@ -15,7 +15,7 @@ async function main() {
   // Create and start Express app
   const app = createApp();
   app.listen(config.port, () => {
-    console.log(`HumanLedger API running at ${config.serverBaseUrl}`);
+    console.log(`RealH API running at ${config.serverBaseUrl}`);
     console.log(`  Mode:       ${config.demoMode ? 'DEMO (in-memory)' : 'PRODUCTION (Firebase)'}`);
     console.log(`  JWKS:       ${config.serverBaseUrl}/.well-known/jwks.json`);
     console.log(`  DID:        ${config.serverBaseUrl}/.well-known/did.json`);
