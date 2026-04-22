@@ -18,7 +18,7 @@ RUN npm ci --workspace=packages/client --include-workspace-root
 COPY packages/client ./packages/client
 RUN npm run build -w packages/client
 
-FROM nginx:1.27-alpine AS runner
+FROM nginx:1.29-alpine AS runner
 # Drop the default nginx site; provide our SPA-aware config instead.
 RUN rm /etc/nginx/conf.d/default.conf
 COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
