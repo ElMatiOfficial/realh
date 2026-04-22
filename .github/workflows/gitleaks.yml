@@ -10,6 +10,9 @@ on:
 
 permissions:
   contents: read
+  # gitleaks-action@v2 fetches PR commits via the REST API — denied with 403
+  # when this scope is missing, even though the job only reads.
+  pull-requests: read
 
 jobs:
   gitleaks:
