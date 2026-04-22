@@ -1,5 +1,9 @@
 version: 2
 updates:
+  # NPM — one entry at the repo root. With npm workspaces, Dependabot scans
+  # workspace packages from here, so do NOT add separate entries for
+  # /packages/server and /packages/client. That produces duplicate PRs for
+  # every dep.
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -8,21 +12,6 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - dependencies
-    groups:
-      minor-and-patch:
-        update-types:
-          - minor
-          - patch
-
-  - package-ecosystem: npm
-    directory: "/packages/server"
-    schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-      - server
     # Pin security-sensitive deps to major-version PRs only, reviewed manually.
     ignore:
       - dependency-name: jose
@@ -35,21 +24,7 @@ updates:
           - minor
           - patch
 
-  - package-ecosystem: npm
-    directory: "/packages/client"
-    schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-      - client
-    groups:
-      minor-and-patch:
-        update-types:
-          - minor
-          - patch
-
+  # GitHub Actions — root-level workflows only.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -59,6 +34,7 @@ updates:
       - dependencies
       - ci
 
+  # Docker — one entry per Dockerfile (these are not workspace-aware).
   - package-ecosystem: docker
     directory: "/packages/server"
     schedule:
