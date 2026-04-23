@@ -1,12 +1,17 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { authenticate } from '../middleware/authenticate.js';
+import { validate } from '../middleware/validate.js';
 import { config } from '../config.js';
 import {
   getAvailableProviders,
   initiateVerification,
   completeVerification,
 } from '../services/verificationService.js';
-import { getDataLayer } from '../data/index.js';
+
+const initiateSchema = z.object({
+  providerId: z.string().min(1).max(64),
+});
 
 const router = Router();
 
@@ -19,7 +24,7 @@ router.get('/providers', authenticate, (req, res) => {
 });
 
 // POST /api/v1/verification/initiate — start verification with a provider
-router.post('/initiate', authenticate, async (req, res, next) => {
+router.post('/initiate', authenticate, validate(initiateSchema), async (req, res, next) => {
   try {
     const { providerId } = req.body;
     const result = await initiateVerification(req.uid, providerId, config.serverBaseUrl);
@@ -91,20 +96,48 @@ router.get('/mock-demo/authorize', (req, res) => {
   `);
 });
 
-// GET /api/v1/verification/callback — handle provider callback
-router.get('/callback', async (req, res, next) => {
-  try {
-    const { session, action } = req.query;
-    const result = await completeVerification(session, { action });
+// GET /api/v1/verification/callback — handle provider callback.
+//
+// The failure branches emit a short, allow-listed error *code* rather than a
+// free-form message. Raw error strings from providers or exceptions shouldn't
+// be reflected into a browser URL: they can leak stack fragments, internal
+// identifiers, or PII through browser history, referrer headers, and any
+// client-side logging. The client is expected to map these codes to
+// user-facing text.
+const REDIRECT_ERROR_CODES = new Set([
+  'user_denied',
+  'session_expired',
+  'session_invalid',
+  'provider_error',
+  'verification_failed',
+  'internal_error',
+]);
 
+function safeErrorCode(code) {
+  const normalized = String(code || '').toLowerCase();
+  return REDIRECT_ERROR_CODES.has(normalized) ? normalized : 'verification_failed';
+}
+
+router.get('/callback', async (req, res) => {
+  const { session, action } = req.query;
+  let redirectUrl;
+  try {
+    const result = await completeVerification(session, { action });
     if (result.success) {
-      res.redirect(`${config.clientBaseUrl}/verification/complete?status=success&humanId=${result.humanId}`);
+      const humanId = encodeURIComponent(result.humanId);
+      redirectUrl = `${config.clientBaseUrl}/verification/complete?status=success&humanId=${humanId}`;
     } else {
-      res.redirect(`${config.clientBaseUrl}/verification/complete?status=failed&error=${encodeURIComponent(result.error || 'Verification failed')}`);
+      // Provider-supplied error code, mapped to the allow-list.
+      const code = safeErrorCode(result.errorCode);
+      redirectUrl = `${config.clientBaseUrl}/verification/complete?status=failed&code=${code}`;
     }
   } catch (err) {
-    res.redirect(`${config.clientBaseUrl}/verification/complete?status=failed&error=${encodeURIComponent(err.message)}`);
+    // Log server-side for operators; never surface err.message to the browser.
+    console.error('verification callback error:', err);
+    const code = err?.code ? safeErrorCode(err.code.toLowerCase()) : 'internal_error';
+    redirectUrl = `${config.clientBaseUrl}/verification/complete?status=failed&code=${code}`;
   }
+  res.redirect(redirectUrl);
 });
 
 export default router;

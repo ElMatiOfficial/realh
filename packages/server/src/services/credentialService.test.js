@@ -107,7 +107,7 @@ describe('credentialService round-trip', () => {
     expect(result.error).toMatch(/proof\.jws/i);
   });
 
-  it('issues a human-verification JWT with a 1-hour expiry', async () => {
+  it('issues a human-verification JWT with a 1-hour expiry (no audience by default)', async () => {
     const token = await issueHumanVerificationToken('human-abc', host);
     expect(token).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
 
@@ -117,12 +117,25 @@ describe('credentialService round-trip', () => {
     expect(header.alg).toBe('EdDSA');
     expect(header.kid).toBe('realh-key-1');
 
-    // Payload should carry sub / iss / iat / exp with exp == iat + 3600s.
+    // Payload: sub / iss / iat / exp with exp == iat + 3600s. No aud claim
+    // when the caller didn't specify one.
     const [, payloadB64] = token.split('.');
     const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
     expect(payload.sub).toBe('urn:realh:human:human-abc');
     expect(payload.iss).toBe(`did:web:${host}`);
     expect(payload.exp - payload.iat).toBe(3600);
     expect(payload.humanVerified).toBe(true);
+    expect(payload.aud).toBeUndefined();
+  });
+
+  it('scopes the JWT to an audience when one is supplied', async () => {
+    const token = await issueHumanVerificationToken(
+      'human-abc',
+      host,
+      'https://rp.example'
+    );
+    const [, payloadB64] = token.split('.');
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
+    expect(payload.aud).toBe('https://rp.example');
   });
 });

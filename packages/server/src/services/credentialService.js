@@ -84,17 +84,28 @@ export async function verifyCredential(credential) {
   }
 }
 
-export async function issueHumanVerificationToken(humanId, hostname) {
+/**
+ * Issue a short-lived JWT attesting that `humanId` is a verified human.
+ *
+ * `audience` is strongly recommended in production. Without it, the token is
+ * semantically "valid for any relying party", which defeats scope checks and
+ * means a token obtained by one RP can be replayed against another. Callers
+ * should pass the specific RP identifier (URL or opaque string) they intend
+ * the token to be consumed by; relying parties MUST verify the `aud` claim
+ * matches their own expected value.
+ */
+export async function issueHumanVerificationToken(humanId, hostname, audience) {
   const issuerDid = getIssuerDid(hostname);
-  const jwt = await new SignJWT({
-    humanVerified: true,
-  })
+  let builder = new SignJWT({ humanVerified: true })
     .setProtectedHeader({ alg: 'EdDSA', kid: getKeyId() })
     .setSubject(`urn:realh:human:${humanId}`)
     .setIssuer(issuerDid)
     .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(getPrivateKey());
+    .setExpirationTime('1h');
 
-  return jwt;
+  if (audience) {
+    builder = builder.setAudience(audience);
+  }
+
+  return builder.sign(getPrivateKey());
 }
