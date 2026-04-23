@@ -8,9 +8,14 @@ The Code of Conduct applies within all project spaces and also when an individua
 
 ## Enforcement contact
 
-Report unacceptable behavior privately to the maintainers at `conduct@<your-domain>` (replace before publishing). Reports will be reviewed and investigated promptly and fairly. Reporter identity will be kept confidential to the extent possible.
+To report Code of Conduct violations privately:
 
-For security vulnerabilities, use the channel in [SECURITY.md](SECURITY.md) instead.
+- Open a **[GitHub Security Advisory](https://github.com/ElMatiOfficial/human-poc/security/advisories/new)** with "Code of Conduct" in the title. This uses the same private-reporting mechanism as security vulnerabilities and is not visible to the public or other contributors.
+- Alternatively, use GitHub's built-in **Report content** menu on any specific comment, issue, or PR.
+
+Reports are reviewed by the repository maintainer. Reporter identity is kept confidential to the extent possible. A dedicated email or additional moderators may be added once the project grows beyond single-maintainer scope.
+
+For security vulnerabilities — not conduct issues — use [SECURITY.md](SECURITY.md).
 
 ## Enforcement guidelines
 
