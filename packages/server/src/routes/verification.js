@@ -49,9 +49,37 @@ router.get('/status', authenticate, async (req, res) => {
   });
 });
 
-// GET /api/v1/verification/mock-demo/authorize — mock provider's authorization page
+// GET /api/v1/verification/mock-demo/authorize — mock provider's authorization page.
+//
+// Security hardening (see #SECURITY_REVIEW_2026-04):
+//   - Gated on DEMO_MODE. In production the mock provider must not be
+//     reachable; returning 404 here makes that contract enforceable from the
+//     outside.
+//   - The session ID is strictly format-validated against the shape emitted
+//     by initiateVerification() ('vs_' + 32 hex chars). Rejects anything
+//     injected via the query string.
+//   - The callback URL is no longer trusted from the query string; it's built
+//     from config.serverBaseUrl. Previously a caller could pass
+//     ?callback=https://attacker.example and harvest the session on the
+//     Approve click — classic open redirect.
+//   - The session is URL-encoded into the href as defense-in-depth even
+//     though format-validation already constrains it to URL-safe chars.
+const SESSION_RE = /^vs_[a-f0-9]{32}$/;
+
 router.get('/mock-demo/authorize', (req, res) => {
-  const { session, callback } = req.query;
+  if (!config.demoMode) {
+    return res.status(404).send('Not Found');
+  }
+
+  const { session } = req.query;
+  if (typeof session !== 'string' || !SESSION_RE.test(session)) {
+    return res.status(400).send('Invalid session identifier');
+  }
+
+  const callbackUrl = `${config.serverBaseUrl}/api/v1/verification/callback`;
+  const denyHref = `${callbackUrl}?session=${encodeURIComponent(session)}&action=deny`;
+  const approveHref = `${callbackUrl}?session=${encodeURIComponent(session)}&action=approve`;
+
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -88,8 +116,8 @@ router.get('/mock-demo/authorize', (req, res) => {
           <p>For this demo, click <strong>Approve</strong> to simulate a successful verification.</p>
         </div>
         <div class="actions">
-          <a href="${callback}?session=${session}&action=deny" class="btn btn-deny">Deny</a>
-          <a href="${callback}?session=${session}&action=approve" class="btn btn-approve">Approve</a>
+          <a href="${denyHref}" class="btn btn-deny">Deny</a>
+          <a href="${approveHref}" class="btn btn-approve">Approve</a>
         </div>
       </div>
     </body>

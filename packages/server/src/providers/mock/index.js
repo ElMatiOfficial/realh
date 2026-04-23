@@ -7,8 +7,13 @@ export class MockProvider extends ProviderAdapter {
   get country() { return 'XX'; }
   get description() { return 'Simulated verification for development and testing. Automatically approves all requests.'; }
 
-  async getAuthorizationUrl(sessionId, callbackUrl) {
-    const url = `${this.config.serverBaseUrl}/api/v1/verification/mock-demo/authorize?session=${sessionId}&callback=${encodeURIComponent(callbackUrl)}`;
+  async getAuthorizationUrl(sessionId, _callbackUrl) {
+    // The mock's authorize page now hardcodes its callback from
+    // config.serverBaseUrl and refuses to trust a callback passed in the
+    // query string (that used to be an open-redirect vector). The
+    // `callbackUrl` argument is still declared on the adapter interface
+    // for real providers; ignored here.
+    const url = `${this.config.serverBaseUrl}/api/v1/verification/mock-demo/authorize?session=${encodeURIComponent(sessionId)}`;
     return {
       url,
       state: { sessionId, initiatedAt: Date.now() },
