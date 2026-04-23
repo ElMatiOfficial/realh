@@ -8,10 +8,7 @@ RealH is pre-1.0. Security fixes are applied to the `main` branch only. Once we 
 
 **Please do not open public GitHub issues for security vulnerabilities.**
 
-Report privately via one of:
-
-1. **GitHub Private Vulnerability Reporting** (preferred) — on the repo's **Security** tab, click **Report a vulnerability**.
-2. **Email** — send to `security@<your-domain>` (replace with the real address before publishing the repo). PGP key fingerprint will be published here when available.
+**Use [GitHub Private Vulnerability Reporting](https://github.com/ElMatiOfficial/realh/security/advisories/new)** — on the repo's **Security** tab, click **Report a vulnerability**. This is the only supported channel while RealH is maintained by a single contributor on a personal account. An email intake and PGP key may be added in the future and will be listed here when available.
 
 Please include:
 

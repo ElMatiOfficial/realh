@@ -11,7 +11,7 @@ Thanks for your interest. RealH is a security-sensitive project (we issue signed
 ## Development setup
 
 ```bash
-git clone https://github.com/<your-org>/realh.git
+git clone https://github.com/ElMatiOfficial/realh.git
 cd realh
 npm install
 npm run dev
