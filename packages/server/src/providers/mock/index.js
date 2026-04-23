@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 import { ProviderAdapter } from '../base.js';
 
 export class MockProvider extends ProviderAdapter {
@@ -19,7 +19,10 @@ export class MockProvider extends ProviderAdapter {
     if (params.action === 'approve') {
       return {
         success: true,
-        providerSubjectId: 'mock_' + randomUUID().replace(/-/g, '').substring(0, 16),
+        // 8 random bytes → 16 hex chars → 64 bits of entropy. Keeps the same
+        // display width as the original truncated-UUID form but without the
+        // entropy loss from dropping half a UUIDv4.
+        providerSubjectId: 'mock_' + randomBytes(8).toString('hex'),
         errorCode: null,
         errorMessage: null,
       };

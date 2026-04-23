@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 import { getDataLayer } from '../data/index.js';
 import { getProvider, listProviders } from '../providers/index.js';
 import { generateHumanId } from '../utils/humanId.js';
@@ -14,7 +14,10 @@ export async function initiateVerification(uid, providerId, serverBaseUrl) {
     throw new NotFoundError(`Provider '${providerId}' not found`);
   }
 
-  const sessionId = 'vs_' + randomUUID().replace(/-/g, '').substring(0, 24);
+  // 16 random bytes → 32 hex chars → 128 bits of entropy. Previous version
+  // truncated a UUIDv4 to 24 hex chars, discarding ~40 bits of randomness and
+  // leaving the session space collision-prone under load.
+  const sessionId = 'vs_' + randomBytes(16).toString('hex');
   const callbackUrl = `${serverBaseUrl}/api/v1/verification/callback`;
 
   const { url, state } = await provider.getAuthorizationUrl(sessionId, callbackUrl);
@@ -79,6 +82,13 @@ export async function completeVerification(sessionId, params) {
       completedAt: new Date().toISOString(),
     });
 
-    return { success: false, error: result.errorMessage };
+    // Return the provider-supplied errorCode (if any) so the route layer can
+    // map it to an allow-listed redirect code. `errorMessage` stays internal
+    // and is not propagated to the client.
+    return {
+      success: false,
+      errorCode: result.errorCode || null,
+      errorMessage: result.errorMessage || null,
+    };
   }
 }

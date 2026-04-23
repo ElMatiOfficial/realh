@@ -42,12 +42,19 @@ export function createApp() {
   }));
 
   // CORS: explicit allowlist from config. Rejects credentialed requests from
-  // origins that aren't in the list. No wildcard, ever.
+  // origins that aren't in the list. No wildcard, ever. The comparison is
+  // against URL-normalized origins (see config.js) — not raw string equality —
+  // to defeat suffix tricks like "http://localhost:3001.attacker.com".
   app.use(cors({
     origin(origin, cb) {
       // Allow same-origin / non-browser callers (curl, server-to-server) which send no Origin.
       if (!origin) return cb(null, true);
-      if (config.corsOrigins.includes(origin)) return cb(null, true);
+      try {
+        const normalized = new URL(origin).origin;
+        if (config.corsOriginsNormalized.has(normalized)) return cb(null, true);
+      } catch {
+        // Unparseable Origin header — fall through to reject.
+      }
       return cb(new Error(`CORS: origin "${origin}" not allowed`));
     },
     credentials: true,

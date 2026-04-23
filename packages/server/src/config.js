@@ -10,6 +10,19 @@ const corsOrigins = (process.env.CORS_ORIGINS || clientBaseUrl)
   .map(o => o.trim())
   .filter(Boolean);
 
+// Normalize allowed origins once at load time via URL parsing. Using a Set of
+// `new URL(x).origin` values means the comparison is against canonical
+// "scheme://host[:port]" — case-normalized, default ports elided, no trailing
+// slash or path. Substring tricks like "http://localhost:3001.attacker.com"
+// can't masquerade as "http://localhost:3001".
+const corsOriginsNormalized = new Set(
+  corsOrigins
+    .map((o) => {
+      try { return new URL(o).origin; } catch { return null; }
+    })
+    .filter(Boolean)
+);
+
 export const config = {
   port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -17,6 +30,7 @@ export const config = {
   serverBaseUrl: process.env.SERVER_BASE_URL || 'http://localhost:3001',
   clientBaseUrl,
   corsOrigins,
+  corsOriginsNormalized,
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || '256kb',
   firebase: {
     projectId: process.env.FIREBASE_PROJECT_ID || 'realh-poc',
