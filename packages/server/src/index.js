@@ -3,27 +3,31 @@ import { initializeKeys } from './services/keyManager.js';
 import { initializeDataLayer } from './data/index.js';
 import { initializeProviders } from './providers/index.js';
 import { createApp } from './app.js';
+import { logger } from './utils/logger.js';
 
 async function main() {
-  console.log(`Starting RealH API server (${config.demoMode ? 'DEMO' : 'PRODUCTION'} mode)...`);
+  logger.info({ mode: config.demoMode ? 'demo' : 'production' }, 'RealH API starting');
 
-  // Initialize subsystems
   await initializeKeys(process.env.KEYS_DIR || 'keys');
   await initializeDataLayer(config);
   initializeProviders(config);
 
-  // Create and start Express app
   const app = createApp();
   app.listen(config.port, () => {
-    console.log(`RealH API running at ${config.serverBaseUrl}`);
-    console.log(`  Mode:       ${config.demoMode ? 'DEMO (in-memory)' : 'PRODUCTION (Firebase)'}`);
-    console.log(`  JWKS:       ${config.serverBaseUrl}/.well-known/jwks.json`);
-    console.log(`  DID:        ${config.serverBaseUrl}/.well-known/did.json`);
-    console.log(`  Health:     ${config.serverBaseUrl}/health`);
+    logger.info(
+      {
+        url: config.serverBaseUrl,
+        mode: config.demoMode ? 'demo' : 'production',
+        jwks: `${config.serverBaseUrl}/.well-known/jwks.json`,
+        did: `${config.serverBaseUrl}/.well-known/did.json`,
+        health: `${config.serverBaseUrl}/health`,
+      },
+      'RealH API listening'
+    );
   });
 }
 
-main().catch(err => {
-  console.error('Failed to start server:', err);
+main().catch((err) => {
+  logger.fatal({ err }, 'failed to start server');
   process.exit(1);
 });

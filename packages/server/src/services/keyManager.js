@@ -2,6 +2,7 @@ import { generateKeyPair, exportJWK, importJWK } from 'jose';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { logger } from '../utils/logger.js';
 
 const KEY_ID = 'realh-key-1';
 const ALG = 'EdDSA';
@@ -25,7 +26,7 @@ export async function initializeKeys(keysDir) {
     privateKey = await importJWK(privJwk, ALG);
     publicKey = await importJWK(pubJwk, ALG);
     publicJwk = pubJwk;
-    console.log('Loaded existing Ed25519 key pair');
+    logger.info({ kid: pubJwk.kid }, 'loaded existing Ed25519 key pair');
   } else {
     const pair = await generateKeyPair(ALG, { crv: 'Ed25519' });
     const privJwk = { ...await exportJWK(pair.privateKey), kid: KEY_ID, alg: ALG, use: 'sig' };
@@ -37,7 +38,7 @@ export async function initializeKeys(keysDir) {
     privateKey = pair.privateKey;
     publicKey = pair.publicKey;
     publicJwk = pubJwk;
-    console.log('Generated new Ed25519 key pair');
+    logger.info({ kid: pubJwk.kid, path: dir }, 'generated new Ed25519 key pair');
   }
 }
 

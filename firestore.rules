@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// RealH Firestore security rules.
+//
+// The RealH server accesses Firestore via firebase-admin, which uses
+// privileged service-account credentials and bypasses these rules. Client
+// applications (the React SPA, a mobile app, direct SDK callers) are NOT
+// expected to touch Firestore directly — every read and write they need is
+// mediated by the API server.
+//
+// These rules exist so that if a misconfigured client is ever pointed at
+// Firestore — a test harness, a developer experiment, an attacker probing
+// the project credentials — it hits a default-deny wall instead of the
+// database. "Server-only writes" is enforced here; "server-only reads" is
+// enforced too, because users table rows include PII (humanId, email,
+// verification provider identifiers).
+//
+// Before tightening this: confirm nothing in packages/client/src/ reads or
+// writes Firestore directly. `grep -r getFirestore packages/client/` should
+// return empty. If it doesn't, route that access through the server API
+// before lowering the wall.
+//
+// Deploy:
+//   firebase deploy --only firestore:rules
+//
+// Or wire into CI once service-account credentials live in a secret store.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

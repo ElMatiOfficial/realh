@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate } from '../middleware/authenticate.js';
 import { validate } from '../middleware/validate.js';
 import { config } from '../config.js';
+import { logger } from '../utils/logger.js';
 import {
   getAvailableProviders,
   initiateVerification,
@@ -133,7 +134,7 @@ router.get('/callback', async (req, res) => {
     }
   } catch (err) {
     // Log server-side for operators; never surface err.message to the browser.
-    console.error('verification callback error:', err);
+    logger.error({ err, session }, 'verification callback failed');
     const code = err?.code ? safeErrorCode(err.code.toLowerCase()) : 'internal_error';
     redirectUrl = `${config.clientBaseUrl}/verification/complete?status=failed&code=${code}`;
   }
