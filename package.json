@@ -18,5 +18,8 @@
   },
   "devDependencies": {
     "husky": "^9.1.7"
+  },
+  "overrides": {
+    "protobufjs": "7.5.5"
   }
 }
