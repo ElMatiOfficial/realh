@@ -21,7 +21,7 @@ Everything else is secondary. This document describes how each layer answers tho
 | Auth bypass | `authenticate` middleware rejects missing/invalid bearer tokens; Firebase Admin verifies the token signature and `aud`. Demo mode accepts an obviously-demo prefix. | Demo token path must never be reachable in production. `DEMO_MODE=false` disables it. |
 | Cross-origin credential exfiltration | Strict CORS allowlist (`config.corsOrigins`); `credentials: true` only for listed origins; `*` rejected. | Misconfiguration — keep `CORS_ORIGINS` under review in PRs touching env. |
 | Cross-site scripting in the issuer UI | Helmet CSP: `default-src 'none'`, strict `script-src 'self'`, `frame-ancestors 'none'`. `style-src` allows `'unsafe-inline'` only because the demo authorize page uses inline `<style>`. | The demo `mock-demo/authorize` page is not used in production; production providers host their own UI. |
-| Dependency CVEs | `npm audit --audit-level=high` in CI; Dependabot weekly; `jose` and `firebase-admin` major bumps held for manual review. | Zero-days between weekly runs — accept, compensated by CodeQL + gitleaks. |
+| Dependency CVEs | `npm audit --audit-level=high` in CI; Dependabot weekly; `jose` and `firebase-admin` major bumps held for manual review. | Zero-days between weekly runs — accept, compensated by gitleaks (CodeQL currently disabled pending public visibility — see [DEPLOYMENT.md](DEPLOYMENT.md)). |
 | Supply-chain: malicious package | Lockfile committed; new top-level deps require discussion (see [CONTRIBUTING.md](../CONTRIBUTING.md)). | Transitive deps not individually reviewed — standard ecosystem risk. |
 
 ## Key management

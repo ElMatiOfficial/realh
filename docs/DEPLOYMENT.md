@@ -80,7 +80,7 @@ The KMS adapter ([kmsKeyManager.js](../packages/server/src/services/kmsKeyManage
 
 - `GET /health` returns `{ ok: true, mode }` — wire to your LB health check and uptime monitor.
 - Morgan logs requests; pipe to your log stack.
-- CodeQL + gitleaks run on every PR via GitHub Actions. `npm audit --audit-level=high` fails CI on new high-severity advisories.
+- gitleaks runs on every PR via GitHub Actions. `npm audit --audit-level=high` fails CI on new high-severity advisories. CodeQL is disabled while the repo is private (GitHub only offers free CodeQL on public repos) and will be re-enabled on going public.
 
 ## Rollback
 
