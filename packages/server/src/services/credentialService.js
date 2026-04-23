@@ -35,7 +35,16 @@ export async function issueCredential({ humanId, title, contentHash, contentType
     },
   };
 
-  // Sign the credential
+  // Sign the credential.
+  //
+  // We serialize with `JSON.stringify` rather than RFC 8785 JCS, which means
+  // two parties re-serializing the same credential may produce different
+  // bytes and fail verification (key ordering, whitespace, Unicode escapes).
+  // Until JCS is wired in, the proof declares a deliberately-non-standard
+  // cryptosuite name (`realh-eddsa-jws-v1`) so no W3C-conforming verifier
+  // treats this as a standard `eddsa-jcs-2022` proof and silently accepts
+  // interop that isn't actually there. The verifier in this repo is the
+  // authoritative consumer while this label remains in use.
   const payload = new TextEncoder().encode(JSON.stringify(credential));
   const jws = await new CompactSign(payload)
     .setProtectedHeader({ alg: 'EdDSA', kid: getKeyId() })
@@ -43,7 +52,7 @@ export async function issueCredential({ humanId, title, contentHash, contentType
 
   credential.proof = {
     type: 'DataIntegrityProof',
-    cryptosuite: 'eddsa-jcs-2022',
+    cryptosuite: 'realh-eddsa-jws-v1',
     verificationMethod: `${issuerDid}#key-1`,
     created: now,
     proofPurpose: 'assertionMethod',
@@ -60,11 +69,23 @@ export async function verifyCredential(credential) {
       return { valid: false, error: 'No proof.jws found in credential' };
     }
 
+    // Reject proofs that claim a cryptosuite we don't implement. Without this
+    // guard, a caller could submit a credential carrying a JCS-canonicalized
+    // signature and this verifier would treat it as our custom JSON.stringify
+    // form (or vice-versa), silently accepting or rejecting the wrong things.
+    const suite = credential?.proof?.cryptosuite;
+    if (suite !== 'realh-eddsa-jws-v1') {
+      return { valid: false, error: `Unsupported proof.cryptosuite: ${suite ?? '(missing)'}` };
+    }
+
     const { payload } = await compactVerify(jws, getPublicKey());
     const decoded = JSON.parse(new TextDecoder().decode(payload));
 
-    // Check the signed payload matches the credential content (minus proof)
-    const { proof, ...credentialWithoutProof } = credential;
+    // Check the signed payload matches the credential content (minus proof).
+    // The stringify comparison here uses the same non-canonical serialization
+    // that produced the signature, which is why this check only holds
+    // round-trip within this server — see the comment in issueCredential().
+    const { proof: _proof, ...credentialWithoutProof } = credential;
     const original = JSON.stringify(decoded);
     const current = JSON.stringify(credentialWithoutProof);
 

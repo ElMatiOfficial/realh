@@ -44,7 +44,30 @@ describe('credentialService round-trip', () => {
     expect(credential.credentialSubject.creator.id).toBe('urn:realh:human:human-abc');
     expect(credential.credentialSubject.work.contentHash).toBe(`sha256:${validHash}`);
     expect(credential.proof.type).toBe('DataIntegrityProof');
+    // The cryptosuite label is intentionally non-standard while we serialize
+    // with JSON.stringify instead of RFC 8785 JCS. If this ever gets changed
+    // back to 'eddsa-jcs-2022' without actually wiring JCS, the proof is
+    // lying about the canonicalization — this test exists to catch that.
+    expect(credential.proof.cryptosuite).toBe('realh-eddsa-jws-v1');
     expect(credential.proof.jws).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+$/);
+  });
+
+  it('rejects a credential that claims a cryptosuite we do not implement', async () => {
+    const { credential } = await issueCredential({
+      humanId: 'human-suite',
+      title: 'Mislabeled',
+      contentHash: 'e'.repeat(64),
+      contentType: 'text/plain',
+      hostname: host,
+    });
+
+    // Same payload + signature, but the proof claims a different suite.
+    const relabeled = JSON.parse(JSON.stringify(credential));
+    relabeled.proof.cryptosuite = 'eddsa-jcs-2022';
+
+    const result = await verifyCredential(relabeled);
+    expect(result.valid).toBe(false);
+    expect(result.error).toMatch(/cryptosuite/i);
   });
 
   it('verifies an untouched credential', async () => {

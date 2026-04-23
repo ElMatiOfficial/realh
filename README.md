@@ -16,6 +16,9 @@ Open-source proof-of-personhood and content provenance tooling. RealH issues and
 >
 > RealH is distributed under the Apache License 2.0, which disclaims warranty and limits liability to the extent permitted by law. It is not a substitute for legal counsel.
 
+> [!CAUTION]
+> **`DEMO_MODE=true` is the default and enables a bearer-token bypass.** Any token starting with `demo_` is accepted without cryptographic verification — fine for local development, catastrophic in production. The server refuses to start if `NODE_ENV=production && DEMO_MODE=true`, but do not rely on the kill switch: set `DEMO_MODE=false` explicitly in every non-dev deployment and wire real Firebase Admin credentials.
+
 ## What it does
 
 - **Proof-of-personhood**: verifies a user is a real person via a pluggable identity provider, then issues a stable `humanId` and a signed JWT verification token.
@@ -39,6 +42,9 @@ npm run dev
 - JWKS: <http://localhost:3001/.well-known/jwks.json>
 
 The default `DEMO_MODE=true` runs fully in-memory with a mock identity provider — no Firebase or external services needed.
+
+> [!NOTE]
+> **Upgrading from HumanLedger.** This project was renamed from `HumanLedger` to `RealH` on 2026-04-21. If you have a checkout from before that, the keys under `packages/server/keys/` still carry `kid: humanledger-key-1`. Delete that directory before running — the server will regenerate a fresh Ed25519 pair under `kid: realh-key-1` on next boot. Any credentials you issued under the old kid remain signed by the old key and won't verify against the new JWKS; reissue them.
 
 ## Architecture
 

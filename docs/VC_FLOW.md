@@ -79,7 +79,7 @@ Issued credentials follow [W3C VC Data Model 2.0](https://www.w3.org/TR/vc-data-
   },
   "proof": {
     "type": "DataIntegrityProof",
-    "cryptosuite": "eddsa-jcs-2022",
+    "cryptosuite": "realh-eddsa-jws-v1",
     "verificationMethod": "did:web:api.example.com#key-1",
     "created": "2026-04-22T15:30:00.000Z",
     "proofPurpose": "assertionMethod",
@@ -166,6 +166,7 @@ The `token` is a standard JWT signed with the same Ed25519 key. `sub` is `urn:re
 
 ## Known limitations (pre-1.0)
 
-- Canonicalization is currently `JSON.stringify`, which is not RFC 8785 JCS. Two clients re-serializing the same credential may produce different byte sequences and fail verification. Adopt JCS before 1.0 — tracked as a `security:` issue.
+- **Cryptosuite is non-standard.** The proof carries `cryptosuite: 'realh-eddsa-jws-v1'` rather than the W3C `eddsa-jcs-2022`, because we serialize with `JSON.stringify` instead of RFC 8785 JCS. Using the W3C label while not actually doing JCS would be a false claim that breaks interop with conforming verifiers, so we use an honestly-non-standard label until JCS is implemented. The repo's own verifier explicitly rejects any other cryptosuite name to prevent silent confusion.
+- **Canonicalization is `JSON.stringify`.** Two parties re-serializing the same credential may produce different byte sequences and fail verification (key ordering, whitespace, Unicode escapes). Adopting JCS + switching the cryptosuite label to `eddsa-jcs-2022` is the pre-1.0 migration path.
 - No revocation. If a human's verification is later invalidated, issued credentials remain signed. A revocation list or status registry is future work.
 - No linked-data proofs (LDP) — only JWS. This is intentional for simplicity; LDP support is a separate adapter if demand appears.

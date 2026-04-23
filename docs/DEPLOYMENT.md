@@ -62,8 +62,18 @@ In production mode, `packages/server/src/data/firestore.js` handles persistence.
 1. A GCP project with Firestore (Native mode) enabled.
 2. A service account with `roles/datastore.user`.
 3. The service account key provided via `FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` (the last one read from a secret store, not disk).
+4. The Firestore security rules in [firestore.rules](../firestore.rules) deployed. The shipped rules deny all client-SDK reads and writes — the RealH server uses firebase-admin which bypasses rules, and no component in this repo accesses Firestore from the browser.
 
-Firestore rules should treat the RealH server as the only writer. Clients authenticate with Firebase Auth but never touch Firestore directly.
+Deploy the rules with the Firebase CLI:
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase use <your-project-id>
+firebase deploy --only firestore:rules
+```
+
+Re-deploy after any rule change. Clients authenticate with Firebase Auth and always go through the RealH API; they should never hold the database-admin credentials.
 
 ## Zero-downtime key rotation
 
