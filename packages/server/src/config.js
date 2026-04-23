@@ -24,3 +24,27 @@ export const config = {
     privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   },
 };
+
+// Refuse to boot with DEMO_MODE active in a production environment.
+// Demo mode accepts a bearer token that starts with "demo_" without any
+// cryptographic verification — harmless for local dev, catastrophic if an
+// operator ships a prod deployment with DEMO_MODE=true unset from the default.
+// Fail loudly at import time so it surfaces in startup logs, not after the
+// server starts serving unauthenticated requests.
+if (config.nodeEnv === 'production' && config.demoMode) {
+  console.error(
+    [
+      '',
+      'FATAL: DEMO_MODE=true while NODE_ENV=production.',
+      '',
+      'Demo mode uses a mock identity provider and accepts demo bearer tokens',
+      'without cryptographic verification. It must never run in production.',
+      '',
+      'Fix:',
+      '  - Set DEMO_MODE=false (and provide real Firebase + provider config), or',
+      '  - Set NODE_ENV=development if this is actually a dev/demo deployment.',
+      '',
+    ].join('\n')
+  );
+  process.exit(1);
+}
