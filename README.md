@@ -2,7 +2,19 @@
 
 Open-source proof-of-personhood and content provenance tooling. RealH issues and verifies W3C Verifiable Credentials (VCs) that attest a piece of content was registered by a verified human, and exposes a public JWKS + `did:web` document so any relying party can verify issued credentials without trusting RealH at runtime.
 
-> **Status:** Proof of concept. Production use requires replacing the demo identity provider with a real one (eIDAS, Login.gov, etc.) and moving key material to a KMS. See [docs/SECURITY_ARCHITECTURE.md](docs/SECURITY_ARCHITECTURE.md).
+> [!WARNING]
+> **This is a reference implementation, not a production identity service.**
+>
+> Before using RealH to issue credentials anyone will actually trust, you must replace the following — the defaults here are for development and have known limitations:
+>
+> - **A real identity provider.** The shipped mock proves nothing about the user. Production needs a real IdP (eIDAS, Login.gov, Sumsub, etc.) — see [docs/PROVIDERS.md](docs/PROVIDERS.md).
+> - **KMS-backed signing keys.** The default file-based key manager keeps private keys on disk. A leaked key lets anyone forge credentials that verify against the public JWKS — critical incident. See [docs/SECURITY_ARCHITECTURE.md](docs/SECURITY_ARCHITECTURE.md) for the adapter template.
+> - **Canonical JSON (RFC 8785).** Verification currently uses `JSON.stringify`, which is not deterministic across clients. Two parties re-serializing the same credential may produce different bytes and fail verification. Tracked as a pre-1.0 item.
+> - **Revocation.** Once a credential is issued, it stays valid for the lifetime of the issuer key. There is no revocation list or status registry.
+>
+> Operating a credential-issuing service for real identity verification may carry regulatory and compliance obligations (eIDAS, KYC/AML, GDPR) that this project does not address. Deployers are responsible for meeting them.
+>
+> RealH is distributed under the Apache License 2.0, which disclaims warranty and limits liability to the extent permitted by law. It is not a substitute for legal counsel.
 
 ## What it does
 
