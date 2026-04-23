@@ -27,7 +27,7 @@ Open-source proof-of-personhood and content provenance tooling. RealH issues and
 Requirements: Node.js 20+, npm 10+.
 
 ```bash
-git clone https://github.com/<your-org>/realh.git
+git clone https://github.com/ElMatiOfficial/realh.git
 cd realh
 npm install
 npm run dev
