@@ -24,7 +24,13 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm run test:coverage -w packages/server
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: packages/server/coverage/
+          retention-days: 14
 
   build:
     name: build (client)
