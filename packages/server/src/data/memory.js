@@ -1,3 +1,9 @@
+/**
+ * In-memory implementation of the DataLayer interface (see ./interface.js).
+ * Process-local; resets on restart. DEMO_MODE default.
+ *
+ * @implements {import('./interface.js').DataLayer}
+ */
 export class MemoryDataLayer {
   constructor() {
     this.users = new Map();
@@ -19,6 +25,13 @@ export class MemoryDataLayer {
     if (user) {
       this.users.set(uid, { ...user, ...data });
     }
+  }
+
+  async findVerifiedUserByHumanId(humanId) {
+    for (const user of this.users.values()) {
+      if (user.humanId === humanId && user.isVerified) return user;
+    }
+    return null;
   }
 
   // Verification Sessions

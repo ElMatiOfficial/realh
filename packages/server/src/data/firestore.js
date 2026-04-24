@@ -1,5 +1,12 @@
 import { getFirestore } from 'firebase-admin/firestore';
 
+/**
+ * Firestore implementation of the DataLayer interface (see ./interface.js).
+ * Used when DEMO_MODE=false. All writes go through firebase-admin, which
+ * bypasses the client-facing rules in firestore.rules.
+ *
+ * @implements {import('./interface.js').DataLayer}
+ */
 export class FirestoreDataLayer {
   constructor(firebaseApp) {
     this.db = getFirestore(firebaseApp);
@@ -16,6 +23,20 @@ export class FirestoreDataLayer {
 
   async updateUser(uid, data) {
     await this.db.collection('users').doc(uid).update(data);
+  }
+
+  async findVerifiedUserByHumanId(humanId) {
+    // Requires a composite index on (humanId asc, isVerified asc). Firestore
+    // emits a console hint with the exact index URL on first query if missing.
+    const snap = await this.db
+      .collection('users')
+      .where('humanId', '==', humanId)
+      .where('isVerified', '==', true)
+      .limit(1)
+      .get();
+    if (snap.empty) return null;
+    const doc = snap.docs[0];
+    return { id: doc.id, ...doc.data() };
   }
 
   async createVerificationSession(sessionId, data) {

@@ -21,6 +21,9 @@ Pre-1.0 work toward making the repo safe to flip public and usable by adopters b
 - README `[!WARNING]` + `[!CAUTION]` callouts for the production gaps and the `DEMO_MODE` bearer-token bypass.
 - HumanLedger → RealH migration note in the README Quickstart.
 - [docs/QUICKSTART_DEMO.md](docs/QUICKSTART_DEMO.md) — end-to-end walkthrough from `git clone` to verifying your first credential.
+- [packages/server/src/data/interface.js](packages/server/src/data/interface.js) formalizing the `DataLayer` contract as JSDoc `@typedef`s. Existing `MemoryDataLayer` and `FirestoreDataLayer` annotated with `@implements`; a new `PostgresDataLayer` skeleton implements the full surface against a schema at [packages/server/src/data/postgres.schema.sql](packages/server/src/data/postgres.schema.sql). Selected at runtime via `DATA_LAYER=memory|firestore|postgres`.
+- `findVerifiedUserByHumanId(humanId)` on every backend. Fixes a latent bug where `POST /api/v1/verify/human` reached into `db.users.values()` — a MemoryDataLayer-only detail — and silently returned `verified: false` in production Firestore deployments.
+- Test coverage for the new data-layer method (3 cases): memory.test.js exercises match, isVerified=false, and missing-humanId paths.
 - Pre-public security surface: Apache-2.0 license, CODE_OF_CONDUCT, SECURITY.md with Private Vulnerability Reporting, PR + issue templates, Dependabot config, gitleaks action + config, CI workflow (test / build / lint / audit / gitleaks).
 
 ### Changed
