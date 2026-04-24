@@ -11,6 +11,8 @@ Pre-1.0 work toward making the repo safe to flip public and usable by adopters b
 ### Added
 
 - Credential round-trip + tamper + forgery tests (6 tests in the initial batch, later 8) — first tests in the repo.
+- Coverage gate via `@vitest/coverage-v8`: per-file thresholds on `credentialService.js` (95% lines/statements) and `keyManager.js` (75% lines/statements). CI uploads the full HTML report as an artifact for 14 days.
+- [docs/decisions/001-jcs-canonicalization.md](docs/decisions/001-jcs-canonicalization.md) — ADR capturing the "implement JCS before 1.0" decision and why we ship `realh-eddsa-jws-v1` in the meantime instead of lying about the standard label.
 - `pino` structured logging with redaction for auth headers, cookies, private keys, and passwords. Replaces ad-hoc `console.error` / `console.log`.
 - Zod validation at every mutating public route boundary (`/credentials/issue`, `/verify`, `/verify/human`, `/verification/initiate`) via a shared `validate()` middleware.
 - Optional `audience` field on `POST /api/v1/verify/human`, surfaced as the JWT's `aud` claim.
@@ -27,6 +29,8 @@ Pre-1.0 work toward making the repo safe to flip public and usable by adopters b
 - CORS origin comparison now uses `new URL().origin` normalization instead of raw string equality.
 - Session IDs (`vs_<32 hex>`) and mock provider subject IDs use `randomBytes` instead of truncated UUIDs (no entropy loss).
 - CI `npm audit` now exits 0 at `--audit-level=high`; was red before on undici → firebase chain (fixed by firebase client bump) and `protobufjs` critical (fixed by a root `overrides: { protobufjs: "7.5.5" }`).
+- `firebase-admin` bumped `^12.0.0 → ^13.8.0` (major).
+- Root `overrides` extended with `uuid: ^14.0.0` (clears GHSA-w5hq-g745-h8pq in the firebase-admin transitive chain) and `esbuild: ^0.25.0` (clears GHSA-67mh-4wv8-2f99 in the vitest transitive chain). Total vuln count went from 22 (8 high + 1 critical) at the start of the pre-public work to 11 (0 high + 0 critical, 3 moderate + 8 low).
 - Repo renamed on GitHub: `ElMatiOfficial/human-poc` → `ElMatiOfficial/realh`.
 - Product name reconciled across package names, docs, and generated credential DIDs.
 
