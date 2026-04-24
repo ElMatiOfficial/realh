@@ -17,6 +17,8 @@ Copy `packages/server/.env.example` and `packages/client/.env.example`, then edi
 | `DEMO_MODE` | `true` | When `true`, uses in-memory data and a mock identity provider. Set to `false` to enable Firebase. |
 | `KEYS_DIR` | `keys` | Directory the file-based key manager reads/writes Ed25519 JWKs from. |
 | `KEY_MANAGER` | `file` | `file` or `kms`. `kms` requires implementing the adapter in `packages/server/src/services/kmsKeyManager.js`. |
+| `DATA_LAYER` | `firestore` | Persistence backend when `DEMO_MODE=false`. One of `memory`, `firestore`, `postgres`. |
+| `DATABASE_URL` | — | Postgres connection string. Required when `DATA_LAYER=postgres`. Example: `postgres://user:pass@host:5432/realh?sslmode=require`. |
 | `KMS_PROVIDER` | — | `gcp` / `aws` / `vault`. Only read when `KEY_MANAGER=kms`. |
 | `KMS_KEY_ID` | — | Provider-specific key identifier. |
 | `KMS_KEY_KID` | `realh-key-1` | `kid` advertised in JWKS and used in credential headers. |

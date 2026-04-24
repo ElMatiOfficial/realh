@@ -128,15 +128,7 @@ router.post('/verify/human', validate(verifyHumanSchema), async (req, res, next)
     const { humanId, audience } = req.body;
 
     const db = getDataLayer();
-    let found = null;
-    if (db.users) {
-      for (const user of db.users.values()) {
-        if (user.humanId === humanId && user.isVerified) {
-          found = user;
-          break;
-        }
-      }
-    }
+    const found = await db.findVerifiedUserByHumanId(humanId);
 
     if (!found) {
       return res.json({

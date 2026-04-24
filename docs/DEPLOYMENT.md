@@ -55,6 +55,29 @@ Before pointing traffic at a deployment:
 - [ ] Rate limits reviewed for your traffic (`packages/server/src/middleware/rateLimit.js`).
 - [ ] Logs go somewhere — the default morgan sink is stdout; aggregate it.
 
+## Persistence backends
+
+Three data-layer backends ship in this repo, selected by the `DATA_LAYER` env var (defaults to `firestore` when `DEMO_MODE=false`):
+
+| `DATA_LAYER` | Backend | Requirements | Status |
+| --- | --- | --- | --- |
+| `memory` | In-process `Map` | none | Dev/test only. Loses data on restart. |
+| `firestore` | Google Cloud Firestore | firebase-admin creds + rules deployed | Production-tested. |
+| `postgres` | PostgreSQL 14+ | `pg` installed + `DATABASE_URL` + schema applied | **Reference skeleton — not CI-covered yet.** |
+
+All three implement the same `DataLayer` interface defined in [packages/server/src/data/interface.js](../packages/server/src/data/interface.js). Adding a new backend = implement the interface and register it in [initializeDataLayer](../packages/server/src/data/index.js).
+
+### Postgres
+
+1. Install `pg` in the server workspace: `npm install pg -w packages/server`.
+2. Create a database and apply the schema:
+   ```bash
+   psql "$DATABASE_URL" -f packages/server/src/data/postgres.schema.sql
+   ```
+3. Set env: `DATA_LAYER=postgres`, `DATABASE_URL=postgres://...`.
+
+The Postgres backend carries no CI integration test today — it's a working skeleton, reviewed for shape. Before any production use, run integration tests against a real Postgres (vitest + testcontainers-node is the path we'd take).
+
 ## Firestore
 
 In production mode, `packages/server/src/data/firestore.js` handles persistence. You need:
