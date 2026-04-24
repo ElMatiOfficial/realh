@@ -84,6 +84,12 @@ Session state is held in the data layer (`data/memory.js` or `data/firestore.js`
 
 Adapters that cannot meet these guarantees belong in the `mock`-style demo category and MUST set `displayName` to make that obvious (e.g. "Mock (demo only)").
 
+## OIDC adapter (for real IdPs)
+
+[packages/server/src/providers/oidc/](../packages/server/src/providers/oidc/) is a generic OpenID Connect adapter you can wire to any standards-compliant IdP — Google, Auth0, Cognito, Okta, Keycloak, Login.gov. Handles the security-sensitive parts (state/nonce, ID token signature, iss/aud/exp, nonce replay defense) so per-provider code reduces to a short config block with endpoints, client ID, and client secret.
+
+See [providers/oidc/README.md](../packages/server/src/providers/oidc/README.md) for ready-to-copy configs for Google, Auth0, and Login.gov, plus an explanation of what the adapter does NOT cover (PKCE, userinfo, refresh tokens).
+
 ## The shipped mock
 
 [packages/server/src/providers/mock/](../packages/server/src/providers/mock/) is a stand-in that:
