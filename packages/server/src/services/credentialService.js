@@ -1,6 +1,6 @@
-import { CompactSign, compactVerify, SignJWT } from 'jose';
+import { compactVerify } from 'jose';
 import { randomUUID } from 'crypto';
-import { getPrivateKey, getPublicKey, getKeyId } from './keyManager.js';
+import { signCompact, signJwt, getPublicKey } from './signer/index.js';
 
 export function getIssuerDid(hostname) {
   return `did:web:${hostname}`;
@@ -46,9 +46,7 @@ export async function issueCredential({ humanId, title, contentHash, contentType
   // interop that isn't actually there. The verifier in this repo is the
   // authoritative consumer while this label remains in use.
   const payload = new TextEncoder().encode(JSON.stringify(credential));
-  const jws = await new CompactSign(payload)
-    .setProtectedHeader({ alg: 'EdDSA', kid: getKeyId() })
-    .sign(getPrivateKey());
+  const jws = await signCompact(payload);
 
   credential.proof = {
     type: 'DataIntegrityProof',
@@ -117,16 +115,14 @@ export async function verifyCredential(credential) {
  */
 export async function issueHumanVerificationToken(humanId, hostname, audience) {
   const issuerDid = getIssuerDid(hostname);
-  let builder = new SignJWT({ humanVerified: true })
-    .setProtectedHeader({ alg: 'EdDSA', kid: getKeyId() })
-    .setSubject(`urn:realh:human:${humanId}`)
-    .setIssuer(issuerDid)
-    .setIssuedAt()
-    .setExpirationTime('1h');
-
-  if (audience) {
-    builder = builder.setAudience(audience);
-  }
-
-  return builder.sign(getPrivateKey());
+  const now = Math.floor(Date.now() / 1000);
+  const claims = {
+    humanVerified: true,
+    sub: `urn:realh:human:${humanId}`,
+    iss: issuerDid,
+    iat: now,
+    exp: now + 3600,
+    ...(audience ? { aud: audience } : {}),
+  };
+  return signJwt(claims);
 }
