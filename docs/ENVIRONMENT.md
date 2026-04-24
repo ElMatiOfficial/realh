@@ -16,12 +16,12 @@ Copy `packages/server/.env.example` and `packages/client/.env.example`, then edi
 | `JSON_BODY_LIMIT` | `256kb` | Maximum request body size. Credentials are small; keep this tight. |
 | `DEMO_MODE` | `true` | When `true`, uses in-memory data and a mock identity provider. Set to `false` to enable Firebase. |
 | `KEYS_DIR` | `keys` | Directory the file-based key manager reads/writes Ed25519 JWKs from. |
-| `KEY_MANAGER` | `file` | `file` or `kms`. `kms` requires implementing the adapter in `packages/server/src/services/kmsKeyManager.js`. |
+| `KEY_MANAGER` | `file` | `file` (default) or `kms`. File-backed loads/generates JWKs under `KEYS_DIR`; KMS delegates signing to the configured provider. |
+| `KMS_PROVIDER` | — | Only `gcp` is implemented today (see [signer/kms-gcp.js](../packages/server/src/services/signer/kms-gcp.js)). Read when `KEY_MANAGER=kms`. |
+| `KMS_KEY_ID` | — | Fully-qualified KMS key version name, e.g. `projects/P/locations/L/keyRings/R/cryptoKeys/K/cryptoKeyVersions/1`. Required when `KEY_MANAGER=kms`. |
+| `KMS_KEY_KID` | `realh-key-1` | `kid` advertised in JWKS and set in JWS protected headers. |
 | `DATA_LAYER` | `firestore` | Persistence backend when `DEMO_MODE=false`. One of `memory`, `firestore`, `postgres`. |
 | `DATABASE_URL` | — | Postgres connection string. Required when `DATA_LAYER=postgres`. Example: `postgres://user:pass@host:5432/realh?sslmode=require`. |
-| `KMS_PROVIDER` | — | `gcp` / `aws` / `vault`. Only read when `KEY_MANAGER=kms`. |
-| `KMS_KEY_ID` | — | Provider-specific key identifier. |
-| `KMS_KEY_KID` | `realh-key-1` | `kid` advertised in JWKS and used in credential headers. |
 
 ### Firebase (only when `DEMO_MODE=false`)
 

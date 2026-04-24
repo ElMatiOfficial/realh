@@ -19,8 +19,8 @@ export default defineConfig({
       exclude: [
         '**/*.test.js',
         'src/index.js', // bootstrap, covered by integration when we add one
-        'src/services/kmsKeyManager.js', // stub — tracked separately
         'src/providers/mock/**', // demo code, not on the hot path
+        'src/data/postgres.js', // reference skeleton, CI-covered via integration once testcontainers lands
       ],
       thresholds: {
         'src/services/credentialService.js': {
@@ -29,11 +29,17 @@ export default defineConfig({
           functions: 95,
           lines: 95,
         },
-        'src/services/keyManager.js': {
+        'src/services/signer/file.js': {
           statements: 75,
           branches: 40,
           functions: 75,
           lines: 75,
+        },
+        'src/services/signer/kms-gcp.js': {
+          statements: 80,
+          branches: 40,
+          functions: 80,
+          lines: 80,
         },
       },
     },

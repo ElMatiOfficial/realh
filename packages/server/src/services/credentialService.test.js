@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { tmpdir } from 'node:os';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { initializeKeys } from './keyManager.js';
+import { initializeSigner } from './signer/index.js';
 import {
   issueCredential,
   verifyCredential,
@@ -19,7 +19,7 @@ describe('credentialService round-trip', () => {
 
   beforeAll(async () => {
     keysDir = mkdtempSync(join(tmpdir(), 'realh-cred-test-'));
-    await initializeKeys(keysDir);
+    await initializeSigner({ keysDir });
   });
 
   afterAll(() => {

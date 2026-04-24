@@ -32,17 +32,32 @@ Everything else is secondary. This document describes how each layer answers tho
 
 ### KMS (production)
 
-`packages/server/src/services/kmsKeyManager.js` is the adapter template. Fill in one of:
+`packages/server/src/services/signer/kms-gcp.js` is a working GCP Cloud KMS signer. To enable:
 
-- **GCP Cloud KMS** — `Ed25519`-capable asymmetric key, sign via `asymmetricSign`, public key fetched once and cached.
-- **AWS KMS** — asymmetric `SIGN_VERIFY` key; Ed25519 support is region-dependent — confirm before choosing.
-- **HashiCorp Vault Transit** — `ed25519` key type; `transit/sign/<name>` for signing.
+```bash
+KEY_MANAGER=kms
+KMS_PROVIDER=gcp
+KMS_KEY_ID=projects/<P>/locations/<L>/keyRings/<R>/cryptoKeys/<K>/cryptoKeyVersions/<N>
+KMS_KEY_KID=realh-key-1     # optional; advertised in JWKS
+```
 
-Properties the adapter must preserve:
+Prerequisites on the GCP side:
 
-- Private key never leaves the KMS. `getPrivateKey()` throws; callers use `sign(data)`.
-- `getPublicJwk()` returns the same shape the file-based manager does, so `/.well-known/jwks.json` is unchanged.
+- KMS key purpose `ASYMMETRIC_SIGN` with algorithm `EC_SIGN_ED25519`.
+- Service account running this process has `roles/cloudkms.signerVerifier` on the key (not the keyring).
+- Audit logging enabled for the key's asymmetricSign operations.
+- Install the optional dep: `npm install @google-cloud/kms -w packages/server`.
+
+On startup the signer fetches the KMS public key once (PEM → JWK), caches it, runs a sign-and-verify self-test against the cached public key, and throws on mismatch. The private key never leaves the KMS; every signature is an RPC.
+
+**Other KMS providers** (AWS, Vault) follow the same shape. Port `kms-gcp.js` to `kms-aws.js` / `kms-vault.js` and register in `signer/index.js`. The unit tests demonstrate how to mock the client for offline CI.
+
+Properties all KMS signers must preserve:
+
+- Private key never leaves the KMS. No `getPrivateKey()` API exists.
+- `getPublicJwk()` returns the same shape the file-based signer does, so `/.well-known/jwks.json` is unchanged.
 - `kid` is stable across restarts — otherwise previously-issued credentials stop verifying.
+- `alg` and `kid` in signed headers are enforced by the signer, not the caller — defense against a bug that lets a caller pretend to sign with a different algorithm.
 
 ### Rotation
 

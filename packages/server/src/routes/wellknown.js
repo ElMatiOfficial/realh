@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPublicJwk, getKeyId } from '../services/keyManager.js';
+import { getPublicJwk } from '../services/signer/index.js';
 
 const router = Router();
 

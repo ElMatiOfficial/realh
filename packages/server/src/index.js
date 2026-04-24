@@ -1,5 +1,5 @@
 import { config } from './config.js';
-import { initializeKeys } from './services/keyManager.js';
+import { initializeSigner } from './services/signer/index.js';
 import { initializeDataLayer } from './data/index.js';
 import { initializeProviders } from './providers/index.js';
 import { createApp } from './app.js';
@@ -8,7 +8,7 @@ import { logger } from './utils/logger.js';
 async function main() {
   logger.info({ mode: config.demoMode ? 'demo' : 'production' }, 'RealH API starting');
 
-  await initializeKeys(process.env.KEYS_DIR || 'keys');
+  await initializeSigner({ keysDir: process.env.KEYS_DIR || 'keys' });
   await initializeDataLayer(config);
   initializeProviders(config);
 

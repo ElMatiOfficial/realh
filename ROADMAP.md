@@ -6,7 +6,7 @@ This is a living document. If you disagree with an ordering or want something on
 
 ## 0.2.0 — "safe to deploy behind a real provider"
 
-- [ ] **KMS adapter wired to GCP Cloud KMS.** [packages/server/src/services/kmsKeyManager.js](packages/server/src/services/kmsKeyManager.js) is a template; wire it to `@google-cloud/kms` with real `asymmetricSign` + `getPublicKey`. Unit tests mock the client; production use requires a non-exportable Ed25519 key and a smoke test against a real project. AWS and Vault follow the same interface once the shape is proven.
+- [x] ~~**KMS adapter wired to GCP Cloud KMS.**~~ Landed in [packages/server/src/services/signer/kms-gcp.js](packages/server/src/services/signer/kms-gcp.js). Unit-tested with a mocked client; production use still requires a live smoke test against a real non-exportable Ed25519 key. AWS and Vault ports follow the same shape — see [docs/SECURITY_ARCHITECTURE.md](docs/SECURITY_ARCHITECTURE.md#kms-production).
 - [ ] **Worked OIDC provider example.** Alongside the existing mock, add `providers/oidc-template/` — a concrete adapter against a generic OIDC IdP (Auth0, Google, Cognito). Handles session binding, replay defense, and clock skew. This is the single biggest adoption multiplier per security review.
 - [ ] **Data-layer interface formalized.** JSDoc `@typedef` on [packages/server/src/data/index.js](packages/server/src/data/index.js). Add a `PostgresDataLayer` skeleton (schema, connection, stub implementations) to prove the interface is implementable outside Firestore.
 - [ ] **firebase-admin major bump** to clear the moderate-severity transitive CVE chain (uuid, `@google-cloud/firestore`, `@tootallnate/once`). Currently under the CI `high+` gate but visible under plain `npm audit`.
