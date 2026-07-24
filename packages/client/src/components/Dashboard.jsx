@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, CheckCircle, AlertCircle, Scan, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import VerificationFlow from './VerificationFlow';
+import LiveCodePanel from './LiveCodePanel';
 
 export default function Dashboard() {
   const { userData, refreshUser } = useAuth();
@@ -65,6 +66,8 @@ export default function Dashboard() {
           <div className="text-sm text-slate-400">Issued Credentials</div>
         </div>
       </div>
+
+      <LiveCodePanel />
 
       {showVerifyModal && (
         <VerificationFlow

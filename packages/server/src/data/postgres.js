@@ -31,7 +31,8 @@ export class PostgresDataLayer {
 
   async getUser(uid) {
     const { rows } = await this.pool.query(
-      `SELECT id, email, is_verified AS "isVerified",
+      `SELECT id, email, display_name AS "displayName",
+              is_verified AS "isVerified",
               human_id AS "humanId",
               verified_at AS "verifiedAt",
               verification_provider AS "verificationProvider",
@@ -46,12 +47,13 @@ export class PostgresDataLayer {
   async createUser(uid, data) {
     await this.pool.query(
       `INSERT INTO users (
-         id, email, is_verified, human_id, verified_at,
+         id, email, display_name, is_verified, human_id, verified_at,
          verification_provider, credential_count, joined_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         uid,
         data.email,
+        data.displayName ?? null,
         data.isVerified ?? false,
         data.humanId ?? null,
         data.verifiedAt ?? null,
@@ -68,6 +70,7 @@ export class PostgresDataLayer {
     // partial update) without an ORM.
     const map = {
       email: 'email',
+      displayName: 'display_name',
       isVerified: 'is_verified',
       humanId: 'human_id',
       verifiedAt: 'verified_at',
@@ -92,7 +95,8 @@ export class PostgresDataLayer {
 
   async findVerifiedUserByHumanId(humanId) {
     const { rows } = await this.pool.query(
-      `SELECT id, email, is_verified AS "isVerified",
+      `SELECT id, email, display_name AS "displayName",
+              is_verified AS "isVerified",
               human_id AS "humanId",
               verified_at AS "verifiedAt",
               verification_provider AS "verificationProvider",
@@ -221,5 +225,53 @@ export class PostgresDataLayer {
       [userId]
     );
     return rows;
+  }
+
+  // ---------- Live codes ----------
+
+  async createLiveCode(codeId, data) {
+    await this.pool.query(
+      `INSERT INTO live_codes (
+         code_id, user_id, human_id, note, status, created_at, expires_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        codeId,
+        data.userId,
+        data.humanId,
+        data.note ?? null,
+        data.status,
+        data.createdAt,
+        data.expiresAt,
+      ]
+    );
+  }
+
+  async consumeLiveCode(codeId, now) {
+    const nowIso = now.toISOString();
+    // Conditional UPDATE is the atomic consume: the WHERE clause only matches
+    // an active, unexpired row, and Postgres row-locking guarantees exactly
+    // one of two racing calls gets the RETURNING row.
+    const { rows } = await this.pool.query(
+      `UPDATE live_codes
+       SET status = 'used', used_at = $2
+       WHERE code_id = $1 AND status = 'active' AND expires_at > $2
+       RETURNING code_id AS "codeId", user_id AS "userId", human_id AS "humanId",
+                 note, status, created_at AS "createdAt",
+                 expires_at AS "expiresAt", used_at AS "usedAt"`,
+      [codeId, nowIso]
+    );
+    if (rows[0]) return { outcome: 'consumed', record: rows[0] };
+
+    // Didn't consume — distinguish why for the caller's error message.
+    const { rows: existing } = await this.pool.query(
+      `SELECT code_id AS "codeId", user_id AS "userId", human_id AS "humanId",
+              note, status, created_at AS "createdAt",
+              expires_at AS "expiresAt", used_at AS "usedAt"
+       FROM live_codes WHERE code_id = $1`,
+      [codeId]
+    );
+    if (!existing[0]) return { outcome: 'not_found' };
+    if (existing[0].status === 'used') return { outcome: 'used', record: existing[0] };
+    return { outcome: 'expired', record: existing[0] };
   }
 }

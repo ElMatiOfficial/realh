@@ -9,6 +9,7 @@ export class MemoryDataLayer {
     this.users = new Map();
     this.verificationSessions = new Map();
     this.credentials = new Map();
+    this.liveCodes = new Map();
   }
 
   // Users
@@ -65,5 +66,23 @@ export class MemoryDataLayer {
 
   async listCredentialsByUser(userId) {
     return Array.from(this.credentials.values()).filter(c => c.userId === userId);
+  }
+
+  // Live codes
+  async createLiveCode(codeId, data) {
+    this.liveCodes.set(codeId, { codeId, ...data });
+  }
+
+  async consumeLiveCode(codeId, now) {
+    // Single-threaded Map access is inherently atomic here; the transaction
+    // requirement in the interface is for the networked backends.
+    const record = this.liveCodes.get(codeId);
+    if (!record) return { outcome: 'not_found' };
+    if (record.status === 'used') return { outcome: 'used', record };
+    if (new Date(record.expiresAt) <= now) return { outcome: 'expired', record };
+
+    const consumed = { ...record, status: 'used', usedAt: now.toISOString() };
+    this.liveCodes.set(codeId, consumed);
+    return { outcome: 'consumed', record: consumed };
   }
 }

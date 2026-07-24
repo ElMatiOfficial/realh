@@ -10,6 +10,9 @@ Pre-1.0 work toward making the repo safe to flip public and usable by adopters b
 
 ### Added
 
+- **Live verification codes** — the anti-impersonation feature. A verified user mints a single-use code (`XXXX-XXXX`, unambiguous alphabet, default 120 s TTL via `LIVE_CODE_TTL_SECONDS`) at `POST /api/v1/live-codes`; anyone can redeem it, unauthenticated, at `POST /api/v1/live-codes/verify` or on the public `/verify` page. Codes are stored as SHA-256 hashes only and consumed atomically across all three data layers (conditional `UPDATE` in Postgres, transaction in Firestore); outcomes are `valid` / `invalid` / `expired` / `already_used`, with the replay case surfaced as an explicit warning. Redemption sits behind a dedicated 10/min/IP rate limiter. 15 new tests (service round-trip, single-use, expiry, normalization, race; data-layer consume contract).
+- Public `displayName` on the user profile (`POST /api/v1/me/profile`), shown when a live code verifies. Sanitized of control/format characters (RTL-override and zero-width spoofing) since it's rendered to third parties.
+- Client demo-mode auth: with no `VITE_FIREBASE_API_KEY`, the client mocks the auth surface (localStorage-backed, any email/password) instead of calling real Firebase with a placeholder key — the browser half of `DEMO_MODE` actually works now, no external services needed.
 - Credential round-trip + tamper + forgery tests (6 tests in the initial batch, later 8) — first tests in the repo.
 - Coverage gate via `@vitest/coverage-v8`: per-file thresholds on `credentialService.js` (95% lines/statements) and `keyManager.js` (75% lines/statements). CI uploads the full HTML report as an artifact for 14 days.
 - [docs/decisions/001-jcs-canonicalization.md](docs/decisions/001-jcs-canonicalization.md) — ADR capturing the "implement JCS before 1.0" decision and why we ship `realh-eddsa-jws-v1` in the meantime instead of lying about the standard label.
@@ -43,6 +46,7 @@ Pre-1.0 work toward making the repo safe to flip public and usable by adopters b
 
 ### Fixed
 
+- Navbar still branded "HUMANLEDGER" after the HumanLedger → RealH rename; now "REALH".
 - **Open redirect + HTML injection on `/api/v1/verification/mock-demo/authorize`.** The route interpolated the `callback` and `session` query params directly into the HTML response. A crafted `callback` URL could siphon verified sessions to an attacker host on Approve click. Fix: gate the route on `DEMO_MODE`, validate `session` against the strict `vs_<hex32>` format, and hardcode the callback URL from `config.serverBaseUrl`.
 - **Stack-trace leakage via `console.error`** in the error handler. Now via pino; HTTP responses unchanged (still generic `INTERNAL_ERROR`).
 - **`protobufjs` critical (GHSA-xq3m-2v4x-88gg)** — pinned to 7.5.5 via root `overrides`.

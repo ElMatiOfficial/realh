@@ -60,3 +60,50 @@ describe('MemoryDataLayer.findVerifiedUserByHumanId', () => {
     expect(found).toBeNull();
   });
 });
+
+describe('MemoryDataLayer.consumeLiveCode', () => {
+  /** @type {MemoryDataLayer} */
+  let db;
+
+  const CODE_ID = 'a'.repeat(64);
+  const base = {
+    userId: 'uid-1',
+    humanId: 'hid-abc',
+    note: null,
+    status: 'active',
+    createdAt: '2026-07-24T12:00:00Z',
+    expiresAt: '2026-07-24T12:02:00Z',
+  };
+
+  beforeEach(() => {
+    db = new MemoryDataLayer();
+  });
+
+  it('consumes an active, unexpired code exactly once', async () => {
+    await db.createLiveCode(CODE_ID, base);
+
+    const first = await db.consumeLiveCode(CODE_ID, new Date('2026-07-24T12:01:00Z'));
+    expect(first.outcome).toBe('consumed');
+    expect(first.record.status).toBe('used');
+    expect(first.record.usedAt).toBe('2026-07-24T12:01:00.000Z');
+
+    const second = await db.consumeLiveCode(CODE_ID, new Date('2026-07-24T12:01:30Z'));
+    expect(second.outcome).toBe('used');
+    expect(second.record.usedAt).toBe('2026-07-24T12:01:00.000Z');
+  });
+
+  it('reports expired for a code past expiresAt, without consuming it', async () => {
+    await db.createLiveCode(CODE_ID, base);
+
+    const result = await db.consumeLiveCode(CODE_ID, new Date('2026-07-24T12:02:00Z'));
+    expect(result.outcome).toBe('expired');
+    expect((await db.consumeLiveCode(CODE_ID, new Date('2026-07-24T12:03:00Z'))).outcome).toBe(
+      'expired'
+    );
+  });
+
+  it('reports not_found for an unknown codeId', async () => {
+    const result = await db.consumeLiveCode('f'.repeat(64), new Date());
+    expect(result).toEqual({ outcome: 'not_found' });
+  });
+});

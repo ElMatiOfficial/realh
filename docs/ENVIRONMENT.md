@@ -14,6 +14,7 @@ Copy `packages/server/.env.example` and `packages/client/.env.example`, then edi
 | `CLIENT_BASE_URL` | `http://localhost:5173` | Public URL of the client. Used for CORS fallback and redirect targets. |
 | `CORS_ORIGINS` | — | Comma-separated allowlist of browser origins. Overrides `CLIENT_BASE_URL` when set. `*` is rejected. |
 | `JSON_BODY_LIMIT` | `256kb` | Maximum request body size. Credentials are small; keep this tight. |
+| `LIVE_CODE_TTL_SECONDS` | `120` | How long a live verification code stays redeemable. Clamped to 30–600; keep it short — the code is a liveness proof, not a credential. |
 | `DEMO_MODE` | `true` | When `true`, uses in-memory data and a mock identity provider. Set to `false` to enable Firebase. |
 | `KEYS_DIR` | `keys` | Directory the file-based key manager reads/writes Ed25519 JWKs from. |
 | `KEY_MANAGER` | `file` | `file` (default) or `kms`. File-backed loads/generates JWKs under `KEYS_DIR`; KMS delegates signing to the configured provider. |

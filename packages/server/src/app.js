@@ -3,11 +3,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { config } from './config.js';
-import { apiLimiter, verifyLimiter } from './middleware/rateLimit.js';
+import { apiLimiter, verifyLimiter, liveCodeVerifyLimiter } from './middleware/rateLimit.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
 import verificationRoutes from './routes/verification.js';
 import credentialRoutes from './routes/credentials.js';
+import liveCodeRoutes from './routes/liveCodes.js';
 import wellknownRoutes from './routes/wellknown.js';
 
 export function createApp() {
@@ -75,11 +76,13 @@ export function createApp() {
   // unauthenticated and touch the signing key indirectly. Tighter per-minute
   // limiter in addition to the general one above.
   app.use('/api/v1/verify', verifyLimiter);
+  app.use('/api/v1/live-codes/verify', liveCodeVerifyLimiter);
 
   // API routes.
   app.use('/api/v1', authRoutes);
   app.use('/api/v1/verification', verificationRoutes);
   app.use('/api/v1/credentials', credentialRoutes);
+  app.use('/api/v1/live-codes', liveCodeRoutes);
 
   // Health check.
   app.get('/health', (req, res) => {

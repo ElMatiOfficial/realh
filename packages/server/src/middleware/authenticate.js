@@ -45,6 +45,7 @@ export async function authenticate(req, res, next) {
     if (!user) {
       await db.createUser(uid, {
         email: email || 'unknown',
+        displayName: null,
         isVerified: false,
         humanId: null,
         verifiedAt: null,

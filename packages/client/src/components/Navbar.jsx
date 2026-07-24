@@ -12,7 +12,7 @@ export default function Navbar({ setView, currentView }) {
         <div className="bg-human-neon/10 p-2 rounded-lg border border-human-neon/20">
           <Fingerprint className="w-6 h-6 text-human-neon" />
         </div>
-        <h1 className="text-xl font-bold tracking-wider text-white">HUMAN<span className="text-human-neon">LEDGER</span></h1>
+        <h1 className="text-xl font-bold tracking-wider text-white">REAL<span className="text-human-neon">H</span></h1>
       </div>
 
       <div className="flex items-center gap-6">

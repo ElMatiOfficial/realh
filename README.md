@@ -22,6 +22,7 @@ Open-source proof-of-personhood and content provenance tooling. RealH issues and
 ## What it does
 
 - **Proof-of-personhood**: verifies a user is a real person via a pluggable identity provider, then issues a stable `humanId` and a signed JWT verification token.
+- **Live verification codes**: a verified user generates a short-lived (default 120 s), single-use code and shares it over any channel — a call, WhatsApp, email. Anyone can check it at the public `/verify` page with no account. Built for the deepfake-CEO scenario: if the person on the call can't produce a fresh code, they're not who they claim to be. Codes are stored hash-only, consumed atomically (a replay shows a loud "already used" warning), and redemption is tightly rate-limited.
 - **Content provenance**: given a content hash, issues a W3C VC linking the content to a verified human at a point in time.
 - **Self-verifying**: any third party can fetch `/.well-known/jwks.json` and `/.well-known/did.json` to verify RealH-issued credentials offline.
 
@@ -41,7 +42,7 @@ npm run dev
 - Health: <http://localhost:3001/health>
 - JWKS: <http://localhost:3001/.well-known/jwks.json>
 
-The default `DEMO_MODE=true` runs fully in-memory with a mock identity provider — no Firebase or external services needed.
+The default `DEMO_MODE=true` runs fully in-memory with a mock identity provider — no Firebase or external services needed. This now includes the client: with no `VITE_FIREBASE_API_KEY` set, sign-in uses a localStorage-backed mock (any email/password), so the whole flow — register → verify identity → generate a live code → check it at `/verify` — works out of the box.
 
 > [!NOTE]
 > **Upgrading from HumanLedger.** This project was renamed from `HumanLedger` to `RealH` on 2026-04-21. If you have a checkout from before that, the keys under `packages/server/keys/` still carry `kid: humanledger-key-1`. Delete that directory before running — the server will regenerate a fresh Ed25519 pair under `kid: realh-key-1` on next boot. Any credentials you issued under the old kid remain signed by the old key and won't verify against the new JWKS; reissue them.

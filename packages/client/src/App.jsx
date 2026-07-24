@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import AssetRegistry from './components/AssetRegistry';
 import DeveloperDemo from './components/DeveloperDemo';
 import VerificationCallback from './components/VerificationCallback';
+import VerifyCodePage from './components/VerifyCodePage';
 
 function AppLayout() {
   const { user, userData, loading } = useAuth();
@@ -49,6 +50,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/verification/complete" element={<VerificationCallback />} />
+      {/* Public — no account needed. This is the page a code recipient uses. */}
+      <Route path="/verify" element={<VerifyCodePage />} />
       <Route path="*" element={<AppLayout />} />
     </Routes>
   );

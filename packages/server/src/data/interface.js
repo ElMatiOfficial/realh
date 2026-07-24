@@ -12,6 +12,7 @@
  * @typedef {object} UserRecord
  * @property {string} id                            Stable account ID (Firebase UID or equivalent).
  * @property {string} email                         User-provided email; not verified by the server.
+ * @property {string|null} displayName              Public name shown when a live code verifies; null until set.
  * @property {boolean} isVerified                   True once identity verification succeeded.
  * @property {string|null} humanId                  Public opaque handle; null until verified.
  * @property {string|null} verifiedAt               ISO-8601 timestamp of successful verification.
@@ -46,6 +47,24 @@
  */
 
 /**
+ * @typedef {object} LiveCodeRecord
+ * @property {string} codeId                        SHA-256 hex of the normalized code. The plaintext code is never stored.
+ * @property {string} userId                        Account that generated the code.
+ * @property {string} humanId                       Owner's humanId at generation time.
+ * @property {string|null} note                     Optional context note shown to the verifier.
+ * @property {'active'|'used'} status
+ * @property {string} createdAt                     ISO-8601.
+ * @property {string} expiresAt                     ISO-8601; codes live ~minutes.
+ * @property {string} [usedAt]                      ISO-8601; set when consumed.
+ */
+
+/**
+ * @typedef {object} ConsumeLiveCodeResult
+ * @property {'consumed'|'expired'|'used'|'not_found'} outcome
+ * @property {LiveCodeRecord} [record]              Present for every outcome except 'not_found'.
+ */
+
+/**
  * @typedef {object} DataLayer
  *
  * Users
@@ -66,6 +85,14 @@
  * @property {(credentialId: string, data: Omit<CredentialRecord, 'credentialId'>) => Promise<void>} createCredential
  * @property {(credentialId: string) => Promise<CredentialRecord | null>} getCredential
  * @property {(userId: string) => Promise<CredentialRecord[]>} listCredentialsByUser
+ *
+ * Live codes
+ * @property {(codeId: string, data: Omit<LiveCodeRecord, 'codeId'>) => Promise<void>} createLiveCode
+ * @property {(codeId: string, now: Date) => Promise<ConsumeLiveCodeResult>} consumeLiveCode
+ *   Atomic check-and-consume: if the code is active and unexpired at `now`,
+ *   mark it used and return 'consumed'. Two concurrent calls for the same
+ *   codeId must resolve to exactly one 'consumed' — backends without native
+ *   transactions must serialize this operation.
  */
 
 // This file is types-only. No runtime exports.

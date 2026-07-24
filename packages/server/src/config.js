@@ -32,6 +32,15 @@ export const config = {
   corsOrigins,
   corsOriginsNormalized,
   jsonBodyLimit: process.env.JSON_BODY_LIMIT || '256kb',
+  liveCode: {
+    // How long a generated live code stays redeemable. Short by design: the
+    // code is a liveness proof, not a credential. Clamped so a misconfigured
+    // env var can't silently produce hour-long codes.
+    ttlSeconds: Math.min(
+      600,
+      Math.max(30, parseInt(process.env.LIVE_CODE_TTL_SECONDS || '120', 10) || 120)
+    ),
+  },
   firebase: {
     projectId: process.env.FIREBASE_PROJECT_ID || 'realh-poc',
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,

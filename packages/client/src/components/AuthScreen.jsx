@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Fingerprint, AlertCircle, Loader2 } from 'lucide-react';
-import { signIn, signUp } from '../lib/firebase';
+import { Fingerprint, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
+import { signIn, signUp, DEMO_MODE } from '../lib/firebase';
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -86,6 +86,22 @@ export default function AuthScreen() {
           >
             {isLogin ? "Need an identity? Register" : "Already verified? Login"}
           </button>
+        </div>
+
+        {DEMO_MODE && (
+          <div className="mt-4 text-center text-xs text-slate-500">
+            Demo mode — any email and password work, nothing leaves this machine.
+          </div>
+        )}
+
+        <div className="mt-6 pt-4 border-t border-white/5 text-center">
+          <a
+            href="/verify"
+            className="text-sm text-human-bio hover:text-emerald-300 transition-colors inline-flex items-center gap-2"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Someone sent you a code? Verify it here — no account needed
+          </a>
         </div>
       </div>
     </div>

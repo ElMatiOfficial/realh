@@ -13,6 +13,7 @@
 CREATE TABLE IF NOT EXISTS users (
   id                      TEXT PRIMARY KEY,
   email                   TEXT NOT NULL,
+  display_name            TEXT,
   is_verified             BOOLEAN NOT NULL DEFAULT FALSE,
   human_id                TEXT,
   verified_at             TIMESTAMPTZ,
@@ -58,3 +59,21 @@ CREATE TABLE IF NOT EXISTS credentials (
 
 CREATE INDEX IF NOT EXISTS credentials_user_idx ON credentials (user_id);
 CREATE INDEX IF NOT EXISTS credentials_humanid_idx ON credentials (human_id);
+
+-- Live verification codes. code_id is the SHA-256 hex of the normalized code;
+-- the plaintext code is never stored. Rows are consumable exactly once via a
+-- conditional UPDATE (see PostgresDataLayer.consumeLiveCode).
+CREATE TABLE IF NOT EXISTS live_codes (
+  code_id     TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  human_id    TEXT NOT NULL,
+  note        TEXT,
+  status      TEXT NOT NULL CHECK (status IN ('active', 'used')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ
+);
+
+-- Codes live ~minutes; a periodic sweep can DELETE FROM live_codes WHERE
+-- expires_at < NOW() - INTERVAL '1 day' to keep the table from growing.
+CREATE INDEX IF NOT EXISTS live_codes_expiry_idx ON live_codes (expires_at);

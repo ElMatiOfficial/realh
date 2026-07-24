@@ -22,6 +22,23 @@ async function request(path, options = {}) {
 export const api = {
   // User profile
   getMe: () => request('/api/v1/me'),
+  updateProfile: (data) =>
+    request('/api/v1/me/profile', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Live codes
+  generateLiveCode: (note) =>
+    request('/api/v1/live-codes', {
+      method: 'POST',
+      body: JSON.stringify(note ? { note } : {}),
+    }),
+  verifyLiveCode: (code) =>
+    request('/api/v1/live-codes/verify', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
 
   // Verification
   getProviders: () => request('/api/v1/verification/providers'),

@@ -69,4 +69,26 @@ export class FirestoreDataLayer {
     const snap = await this.db.collection('credentials').where('userId', '==', userId).get();
     return snap.docs.map(d => ({ credentialId: d.id, ...d.data() }));
   }
+
+  async createLiveCode(codeId, data) {
+    await this.db.collection('liveCodes').doc(codeId).set(data);
+  }
+
+  async consumeLiveCode(codeId, now) {
+    // runTransaction gives the read-check-write the atomicity the interface
+    // demands: Firestore retries the closure on contention, so of two racing
+    // verifications one sees status 'active' and the other sees 'used'.
+    const ref = this.db.collection('liveCodes').doc(codeId);
+    return this.db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) return { outcome: 'not_found' };
+      const record = { codeId: snap.id, ...snap.data() };
+      if (record.status === 'used') return { outcome: 'used', record };
+      if (new Date(record.expiresAt) <= now) return { outcome: 'expired', record };
+
+      const usedAt = now.toISOString();
+      tx.update(ref, { status: 'used', usedAt });
+      return { outcome: 'consumed', record: { ...record, status: 'used', usedAt } };
+    });
+  }
 }
