@@ -29,11 +29,15 @@ export default defineConfig({
           functions: 95,
           lines: 95,
         },
+        // Baseline re-measured under vitest 4's AST-aware V8 remapping, which
+        // counts this file lower than vitest 1 did (same code, same tests:
+        // 68.9% statements / 73.2% lines). Thresholds sit just under that to
+        // keep catching regressions without inventing coverage we don't have.
         'src/services/signer/file.js': {
-          statements: 75,
+          statements: 65,
           branches: 40,
           functions: 75,
-          lines: 75,
+          lines: 70,
         },
         'src/services/signer/kms-gcp.js': {
           statements: 80,
