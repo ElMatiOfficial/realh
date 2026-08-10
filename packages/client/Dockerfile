@@ -8,7 +8,7 @@
 # The client talks to the API over the URL baked in at build time via
 # VITE_API_URL. Pass it as a build arg in production.
 
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 ARG VITE_API_URL=http://localhost:3001
 ENV VITE_API_URL=${VITE_API_URL}
