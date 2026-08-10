@@ -1,5 +1,10 @@
 # RealH
 
+[![CI](https://github.com/ElMatiOfficial/realh/actions/workflows/ci.yml/badge.svg)](https://github.com/ElMatiOfficial/realh/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/ElMatiOfficial/realh/actions/workflows/codeql.yml/badge.svg)](https://github.com/ElMatiOfficial/realh/actions/workflows/codeql.yml)
+[![Secret scan](https://github.com/ElMatiOfficial/realh/actions/workflows/gitleaks.yml/badge.svg)](https://github.com/ElMatiOfficial/realh/actions/workflows/gitleaks.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 Open-source proof-of-personhood and content provenance tooling. RealH issues and verifies W3C Verifiable Credentials (VCs) that attest a piece of content was registered by a verified human, and exposes a public JWKS + `did:web` document so any relying party can verify issued credentials without trusting RealH at runtime.
 
 > [!WARNING]
